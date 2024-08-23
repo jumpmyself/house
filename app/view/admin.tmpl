@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员首页</title>
+    <!-- 引入jQuery库 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-image: url('/static/backgroud_3.png'); /* 替换 'background.jpg' 为您实际的背景图片路径 */
+            background-size: cover; /* 让背景图片覆盖整个页面 */
+            background-repeat: no-repeat; /* 禁止背景图片重复显示 */
+            font-family: Arial, sans-serif; /* 保留原有字体设置 */
+            margin: 0;
+            padding: 0;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 10px 15px; /* 减小按钮的 padding */
+            font-size: 16px; /* 减小按钮的字体大小 */
+        }
+
+        /* 按钮悬停效果 */
+        .edit-btn:hover,
+        .delete-btn:hover {
+            background-color: #0056b3; /* 不同的悬停背景颜色 */
+        }
+        /* 调整搜索框、搜索按钮和新增按钮的间距 */
+        #search-form, #add-btn {
+            margin-bottom: 20px; /* 增加搜索框和按钮与列表之间的间距 */
+        }
+        #search-form {
+            display: inline-block; /* 将搜索框和按钮变为行内块元素 */
+        }
+        #search-btn,
+        #add-btn,
+        .edit-btn,
+        .delete-btn {
+            padding: 10px 15px;
+            font-size: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #search-btn {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        #add-btn {
+            float: right;
+            background-color: #007bff; /* 不同的背景颜色 */
+            color: #fff;
+        }
+
+        .edit-btn {
+            background-color: #007bff; /* 不同的背景颜色 */
+            color: #fff; /* 不同的文本颜色 */
+        }
+
+        .delete-btn {
+            background-color: #007bff; /* 不同的背景颜色 */
+            color: #fff;
+        }
+
+        /* 按钮悬停效果 */
+        #search-btn:hover,
+        #add-btn:hover,
+        .edit-btn:hover,
+        .delete-btn:hover {
+            background-color: #0056b3; /* 不同的悬停背景颜色 */
+        }
+        #add-btn {
+            float: right; /* 将新增按钮向右浮动 */
+            margin-left: 10px; /* 可以添加一些左侧间距，避免过于靠近 */
+        }
+        /* 调整搜索和新增按钮的样式 */
+        #search-form input[type="text"],
+        #search-btn,
+        #add-btn {
+            padding: 15px 20px; /* 增大按钮的 padding */
+            font-size: 18px; /* 增大按钮的字体大小 */
+        }
+
+
+        th {
+            color: #007bff;
+        }
+        /* 基本的导航栏样式 */
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw;
+            margin: 0 auto;
+            position: relative; /* 添加相对定位 */
+        }
+        /* 在CSS中设置单元格之间的间距 */
+        table {
+            border-collapse: separate;
+            border-spacing: 0 10px; /* 设置垂直间距为10像素，水平间距为0 */
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        /* 图片样式 */
+        img {
+            max-width: 75%; /* 图片最大宽度为其容器的100% */
+            height: auto; /* 高度自适应，保持宽高比不变 */
+        }
+        /* 左侧导航栏样式 */
+        .sidebar {
+            background-color: #333;
+            color: #fff;
+            width: 200px;
+            position: fixed;
+            top: 0; /* 将top设置为0 */
+            left: 0;
+            bottom: 0;
+            padding-top: 60px;
+            overflow-y: auto;
+            display: none; /* 初始隐藏 */
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px 15px;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer; /* 将鼠标指针改为手型 */
+        }
+        .sidebar a:hover {
+            background-color: #555;
+        }
+        /* 右侧内容区样式 */
+        .content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw; /* 导航栏最大宽度 */
+            margin: 0 auto 20px; /* 居中导航栏，并留出一些底部空间 */
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        #messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            background-color: #fff;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message p {
+            margin: 0;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        /* 添加响应式样式 */
+        @media screen and (max-width: 600px) {
+            input[type="text"],
+            textarea,
+            button[type="submit"] {
+                width: 100%;
+            }
+        }
+        /* 新增样式 */
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .message-container {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .room-item {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .room-image {
+            float: left;
+            margin-right: 20px;
+            width: 100px;
+        }
+        .room-info {
+            float: left;
+        }
+        .room-actions {
+            float: right;
+        }
+        .list-item {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px; /* 增加内边距，使按钮有足够的空间 */
+            margin-bottom: 20px; /* 调整间距大小 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="#" class="top-nav" data-target="room">房间管理</a>
+    <a href="#" class="top-nav" data-target="activity">活动管理</a>
+    <a href="#" class="top-nav" data-target="product">商品管理</a>
+    <a href="#" class="top-nav" data-target="user">用户管理</a>
+    <a href="#" class="top-nav" data-target="order">订单管理</a>
+    <a href="#" class="top-nav" data-target="chatroom">留言板</a>
+{{/*    <a href="#" class="top-nav" data-target="profile">个人中心</a>*/}}
+{{/*    <a href="/order" class="top-nav">订单管理</a>*/}}
+{{/*    <a href="/chatroom" class="top-nav">留言板</a>*/}}
+    <a href="/profile" class="top-nav">个人中心</a>
+</div>
+
+<div class="content">
+    <div id="search-form" style="display: none;">
+        <input type="text" id="search-input" placeholder="请输入搜索关键词">
+        <button id="search-btn">搜索</button>
+    </div>
+    <button id="add-btn" style="display: none;">新增</button>
+</div>
+
+<div id="room-form" style="display: none;">
+    <!-- 房间管理表单 -->
+    <input type="text" id="name" placeholder="房间名称">
+    <input type="number" id="num" placeholder="库存数量">
+    <input type="number" id="price" placeholder="价格">
+    <input type="file" id="image_url" accept="image/*"> <!-- 图片上传 -->
+    <input type="hidden" id="id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="room-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="activity-form" style="display: none;">
+    <!-- 活动管理表单 -->
+    <input type="text" id="activity-title" placeholder="活动标题">
+    <input type="text" id="activity-content" placeholder="内容">
+    <input type="text" id="activity-location" placeholder="地点">
+    <input type="datetime-local" id="activity-time" placeholder="时间">
+    <input type="file" id="activity-image_url" accept="image/*"> <!-- 图片上传 -->
+    <input type="hidden" id="activity-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="activity-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="product-form" style="display: none;">
+    <!-- 商品管理表单 -->
+    <input type="text" id="product-name" placeholder="商品名称">
+    <input type="number" id="product-num" placeholder="库存数量">
+    <input type="number" id="product-price" placeholder="价格">
+    <input type="file" id="product-image_url" accept="image/*"> <!-- 图片上传 -->
+    <input type="hidden" id="product-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="product-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="user-form" style="display: none;">
+    <!-- 用户管理表单 -->
+    <input type="text" id="user-username" placeholder="账号">
+    <input type="password" id="user-password" placeholder="密码">
+    <input type="email" id="user-email" placeholder="邮箱">
+    <input type="tel" id="user-phone" placeholder="手机号">
+    <input type="text" id="user-address" placeholder="收货地址">
+    <input type="file" id="user-image_url" accept="image/*"> <!-- 图片上传 -->
+    <input type="hidden" id="user-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="user-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="order-form" style="display: none;">
+    <!-- 订单管理表单 -->
+    <input type="text" id="order-username" placeholder="用户名">
+    <input type="text" id="order-product" placeholder="商品名称">
+    <input type="datetime-local" id="order-time" placeholder="时间">
+    <input type="number" id="order-price" placeholder="总价格">
+    <input type="hidden" id="order-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="order-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="chatroom-form" style="display: none;">
+    <!-- 留言板管理表单 -->
+    <input type="text" id="chatroom-username" placeholder="用户名">
+    <textarea id="chatroom-content" placeholder="内容"></textarea>
+    <input type="datetime-local" id="chatroom-time" placeholder="时间">
+    <input type="hidden" id="chatroom-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="chatroom-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+
+<div id="profile-form" style="display: none;">
+    <!-- 个人中心管理表单 -->
+    <input type="text" id="profile-username" placeholder="用户名">
+    <input type="password" id="profile-password" placeholder="密码">
+    <input type="email" id="profile-email" placeholder="邮箱">
+    <input type="hidden" id="profile-id" value=""> <!-- 隐藏的ID字段 -->
+    <button id="profile-submit-btn">提交</button> <!-- 新增提交按钮 -->
+</div>
+<div id="list-container" class="content"></div>
+<script>
+    $(document).ready(function() {
+        // 点击导航栏项触发事件
+        $(".top-nav").click(function() {
+            var target = $(this).data("target");
+            $("#search-form, #add-btn, #list-container").hide(); // 隐藏所有内容
+
+            // 显示搜索框和新增按钮
+            $("#search-form, #add-btn").show();
+
+            // 发送 AJAX 请求获取对应数据
+            $.get("/api/getData", { target: target }, function(data) {
+                var listContainer = $("#list-container");
+                listContainer.empty(); // 清空列表内容
+
+                $.each(data, function(index, item) {
+                    var listItem = $("<div>").addClass("list-item");
+                    var itemContent = $("<div>").addClass("item-content");
+
+                    // 根据不同目标渲染不同字段
+                    if (target === "room") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='room-image'>" +
+                            "<h3>" + item.name + "</h3>" +
+                            "<p>库存: " + item.num + "</p>" +
+                            "<p>价格: " + item.price + "</p>"
+                        );
+                    } else if (target === "activity") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='activity-image'>" +
+                            "<h3>" + item.title + "</h3>" +
+                            "<p>标题: " + item.content + "</p>" +
+                            "<p>地点: " + item.place + "</p>" +
+                            "<p>时间: " + item.datetime + "</p>"
+                        );
+                    } else if (target === "product") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='product-image'>" +
+                            "<h3>" + item.name + "</h3>" +
+                            "<p>库存: " + item.num + "</p>" +
+                            "<p>价格: " + item.price + "</p>"
+                        );
+                    }else if (target === "user") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='user-avatar'>" +
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>密码: " + item.password + "</p>" +
+                            "<p>邮箱: " + item.email + "</p>"+
+                            "<p>手机号: " + item.telephone + "</p>"+
+                        "<p>收货地址："+ item.city + "</p>"
+                        );
+                    } else if (target === "order") {
+                        itemContent.html(
+                            "<p>用户名: " + item.user_name + "</p>" +
+                            "<p>商品名: " + item.house_name + "</p>" +
+                            "<p>时间: " + item.created_time + "</p>"+
+                            "<p>总价: " + item.total_price + "</p>"
+                        );
+                    } else if (target === "chatroom") {
+                        itemContent.html(
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>内容: " + item.content + "</p>" +
+                            "<p>时间: " + item.timestamp + "</p>"
+                        );
+                    } else if (target === "profile") {
+                        itemContent.html(
+                            "<img src='/static/" + item.avatar + "' class='profile-avatar'>" +
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>密码: " + item.password + "</p>" +
+                            "<p>邮箱: " + item.email + "</p>"
+                        );
+                    }
+
+                    var editButton = $("<button>").addClass("edit-btn").text("编辑").attr("data-id", item.id);
+                    var deleteButton = $("<button>").addClass("delete-btn").text("删除").attr("data-id", item.id);
+                    var buttonGroup = $("<div>").addClass("button-group").append(editButton, deleteButton);
+
+                    listItem.append(itemContent, buttonGroup);
+                    listContainer.append(listItem);
+                });
+
+                listContainer.show(); // 显示列表容器
+            });
+        });
+// 在点击导航栏项触发事件时，为当前项添加活动类
+        $(".top-nav").click(function() {
+            // 移除先前的活动类
+            $(".top-nav").removeClass("active");
+            // 添加活动类到当前点击的导航项
+            $(this).addClass("active");
+            var target = $(this).data("target");
+            // 其他代码...
+        });
+
+        $("#search-btn").click(function() {
+            var keyword = $("#search-input").val();
+            var target = $(".navbar .top-nav.active").data("target"); // 获取当前活动的导航目标
+            // 发送 AJAX 请求并更新列表
+            $.get("/api/searchData", { target: target, keyword: keyword }, function(data) {
+                var listContainer = $("#list-container");
+                listContainer.empty(); // 清空列表内容
+
+                $.each(data, function(index, item) {
+                    var listItem = $("<div>").addClass("list-item");
+                    var itemContent = $("<div>").addClass("item-content");
+
+                    // 根据不同目标渲染不同字段
+                    if (target === "room") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='room-image'>" +
+                            "<h3>" + item.name + "</h3>" +
+                            "<p>库存: " + item.num + "</p>" +
+                            "<p>价格: " + item.price + "</p>"
+                        );
+                    } else if (target === "activity") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='activity-image'>" +
+                            "<h3>" + item.title + "</h3>" +
+                            "<p>标题: " + item.content + "</p>" +
+                            "<p>地点: " + item.place + "</p>" +
+                            "<p>时间: " + item.datetime + "</p>"
+                        );
+                    } else if (target === "product") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='product-image'>" +
+                            "<h3>" + item.name + "</h3>" +
+                            "<p>库存: " + item.num + "</p>" +
+                            "<p>价格: " + item.price + "</p>"
+                        );
+                    }else if (target === "user") {
+                        itemContent.html(
+                            "<img src='/static/" + item.image_url + "' class='user-avatar'>" +
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>密码: " + item.password + "</p>" +
+                            "<p>邮箱: " + item.email + "</p>"+
+                            "<p>手机号: " + item.telephone + "</p>"+
+                            "<p>收货地址："+ item.city + "</p>"
+                        );
+                    } else if (target === "order") {
+                        itemContent.html(
+                            "<p>用户名: " + item.user_name + "</p>" +
+                            "<p>商品名: " + item.house_name + "</p>" +
+                            "<p>时间: " + item.created_time + "</p>"+
+                            "<p>总价: " + item.total_price + "</p>"
+                        );
+                    } else if (target === "chatroom") {
+                        itemContent.html(
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>内容: " + item.content + "</p>" +
+                            "<p>时间: " + item.timestamp + "</p>"
+                        );
+                    } else if (target === "profile") {
+                        itemContent.html(
+                            "<img src='/static/" + item.avatar + "' class='profile-avatar'>" +
+                            "<p>用户名: " + item.username + "</p>" +
+                            "<p>密码: " + item.password + "</p>" +
+                            "<p>邮箱: " + item.email + "</p>"
+                        );
+                    }
+
+                    var editButton = $("<button>").addClass("edit-btn").text("编辑").attr("data-id", item.id);
+                    var deleteButton = $("<button>").addClass("delete-btn").text("删除").attr("data-id", item.id);
+                    var buttonGroup = $("<div>").addClass("button-group").append(editButton, deleteButton);
+
+                    listItem.append(itemContent, buttonGroup);
+                    listContainer.append(listItem);
+                });
+                listContainer.show(); // 显示列表容器
+            });
+        });
+
+        let currentMode = ""; // 初始化为无状态
+
+        $("#add-btn").click(function() {
+            var target = $(".navbar .top-nav.active").data("target");
+
+            // 设置新增模式
+            currentMode = "add";
+
+            // 根据不同的导航项显示相应的表单
+            switch(target) {
+                case "room":
+                    $("#room-form").show();
+                    break;
+                case "activity":
+                    $("#activity-form").show();
+                    break;
+                case "product":
+                    $("#product-form").show();
+                    break;
+                case "user":
+                    $("#user-form").show();
+                    break;
+                case "order":
+                    $("#order-form").show();
+                    break;
+                case "chatroom":
+                    $("#chatroom-form").show();
+                    break;
+                case "profile":
+                    $("#profile-form").show();
+                    break;
+                default:
+                    // 如果没有匹配的目标，可以显示默认的表单或者采取其他操作
+                    alert("未知目标");
+                    break;
+            }
+        });
+
+
+        // 监听列表项的编辑按钮点击事件
+        $("#list-container").on("click", ".edit-btn", function() {
+            var target = $(".navbar .top-nav.active").data("target");
+            var itemId = $(this).data("id");
+// 设置编辑模式
+            currentMode = "edit";
+
+            switch(target) {
+                case "room":
+                    loadRoomData(itemId);
+                    break;
+                case "activity":
+                    loadActivityData(itemId);
+                    break;
+                case "product":
+                    loadProductData(itemId);
+                    break;
+                case "user":
+                    loadUserData(itemId);
+                    break;
+                case "order":
+                    loadOrderData(itemId);
+                    break;
+                case "chatroom":
+                    loadChatroomData(itemId);
+                    break;
+                case "profile":
+                    loadProfileData(itemId);
+                    break;
+                default:
+                    alert("未知目标");
+                    break;
+            }
+
+
+// 加载房间数据到编辑表单
+            function loadRoomData(itemId) {
+                // 发送 AJAX 请求获取房间数据
+                $.get("/api/getRoom", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var roomData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#name").val(roomData.name);
+                    $("#price").val(roomData.price);
+                    $("#num").val(roomData.num);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#id").val(itemId);
+
+                    // 显示房间编辑表单
+                    $("#room-form").show();
+                });
+            }
+
+// 加载活动数据到编辑表单
+            function loadActivityData(itemId) {
+                // 发送 AJAX 请求获取活动数据
+                $.get("/api/getActivity", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var activityData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#activity-title").val(activityData.title);
+                    $("#activity-content").val(activityData.content);
+                    $("#activity-location").val(activityData.place);
+                    $("#activity-time").val(activityData.time);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#activity-id").val(itemId);
+
+                    // 显示活动编辑表单
+                    $("#activity-form").show();
+                });
+            }
+
+// 加载产品数据到编辑表单
+            function loadProductData(itemId) {
+                // 发送 AJAX 请求获取产品数据
+                $.get("/api/getProduct", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var productData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#product-name").val(productData.name);
+                    $("#product-num").val(productData.num);
+                    $("#product-price").val(productData.price);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#product-id").val(itemId);
+
+                    // 显示产品编辑表单
+                    $("#product-form").show();
+                });
+            }
+
+// 加载用户数据到编辑表单
+            function loadUserData(itemId) {
+                // 发送 AJAX 请求获取用户数据
+                $.get("/api/getUser", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var userData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#user-username").val(userData.username);
+                    $("#user-password").val(userData.password);
+                    $("#user-email").val(userData.email);
+                    $("#user-phone").val(userData.telephone);
+                    $("#user-address").val(userData.city);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#user-id").val(itemId);
+
+                    // 显示用户编辑表单
+                    $("#user-form").show();
+                });
+            }
+
+// 加载订单数据到编辑表单
+            function loadOrderData(itemId) {
+                // 发送 AJAX 请求获取订单数据
+                $.get("/api/getOrder", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var orderData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#order-username").val(orderData.username);
+                    $("#order-product").val(orderData.productName);
+                    $("#order-time").val(orderData.orderTime);
+                    $("#order-price").val(orderData.totalPrice);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#order-id").val(itemId);
+
+                    // 显示订单编辑表单
+                    $("#order-form").show();
+                });
+            }
+
+// 加载聊天室数据到编辑表单
+            function loadChatroomData(itemId) {
+                // 发送 AJAX 请求获取聊天室数据
+                $.get("/api/getChatroom", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var chatroomData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#chatroom-username").val(chatroomData.username);
+                    $("#chatroom-content").val(chatroomData.content);
+                    $("#chatroom-time").val(chatroomData.time);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#chatroom-id").val(itemId);
+
+                    // 显示聊天室编辑表单
+                    $("#chatroom-form").show();
+                });
+            }
+
+// 加载个人资料数据到编辑表单
+            function loadProfileData(itemId) {
+                // 发送 AJAX 请求获取个人资料数据
+                $.get("/api/getProfile", { id: itemId }, function(data) {
+                    // 解析返回的数据
+                    var profileData = data.data;
+
+                    // 将数据填充到编辑表单中
+                    $("#profile-username").val(profileData.username);
+                    $("#profile-password").val(profileData.password);
+                    $("#profile-email").val(profileData.email);
+                    // 设置隐藏字段（假设有一个隐藏的字段用于存储 itemId）
+                    $("#profile-id").val(itemId);
+
+                    // 显示个人资料编辑表单
+                    $("#profile-form").show();
+                });
+            }
+
+        });
+
+        // 监听列表项的删除按钮点击事件
+        $("#list-container").on("click", ".delete-btn", function() {
+            var itemId = $(this).data("id");
+            var target = $(".navbar .top-nav.active").data("target"); // 获取当前活动的导航目标
+
+            // 发送 AJAX 请求删除对应项
+            $.ajax({
+                type: "POST",
+                url: "/api/deleteItem", // 替换为实际的删除项的后端接口路径
+                data: { id: itemId, target: target }, // 传递当前活动的导航目标给后端
+                success: function(response) {
+                    if (response.success) {
+                        alert("删除成功！");
+                        // 删除成功，从页面中移除该项
+                        $(this).closest(".list-item").remove();
+                        // 或者重新加载数据，取决于后端处理后的返回
+                        // 删除成功后重新加载页面
+                        location.reload();
+                    } else {
+                        // 删除失败，显示错误消息或者采取其他操作
+                        alert("删除失败，请重试。");
+                    }
+                },
+                error: function() {
+                    // 处理AJAX请求失败的情况
+                    alert("删除失败，请稍后再试。");
+                }
+            });
+        });
+
+        // 房间管理表单提交事件监听
+        $("#room-submit-btn").click(function() {
+            var roomName = $("#name").val();
+            var roomNum = $("#num").val();
+            var roomPrice = $("#price").val();
+var itemId = $("#id").val();
+            // 获取上传的图片文件
+            var roomImage = $("#image_url")[0].files[0];
+
+            // 构建表单数据对象
+            var formData = new FormData();
+            formData.append("name", roomName);
+            formData.append("num", roomNum);
+            formData.append("price", roomPrice);
+            formData.append("image_url", roomImage); // 将图片文件添加到表单数据中
+formData.append("id", itemId); // 将 itemId 添加到表单数据中
+            // 判断当前操作模式是添加还是编辑
+            if (currentMode === "add") {
+                // 发送 AJAX 请求提交数据
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addRoom", // 替换为实际的后端接口路径
+                    data: formData,
+                    contentType: false, // 不设置内容类型
+                    processData: false, // 不处理数据
+                    success: function(response) {
+                        // 处理成功响应
+                        alert("房间添加成功！");
+                        location.reload();
+                        // 清空表单
+                        $("#name").val("");
+                        $("#num").val("");
+                        $("#price").val("");
+                        $("#image_url").val(""); // 清空图片文件输入
+                        // 其他操作...
+                    },
+                    error: function() {
+                        // 处理错误情况
+                        alert("房间添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id");// 获取编辑的项的ID/ 获取编辑的项的ID
+console.log(itemId);
+                // 发送 AJAX 请求更新数据
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateRoom",
+                    data: formData,
+                    contentType: false, // 不设置内容类型
+                    processData: false, // 不处理数据
+                    success: function(response) {
+                        // 处理成功响应
+                        alert("房间更新成功！");
+                        location.reload();
+                        // 清空表单
+                        $("#name").val("");
+                        $("#num").val("");
+                        $("#price").val("");
+                        $("#image_url").val(""); // 清空图片文件输入
+                        // 其他操作...
+                    },
+                    error: function() {
+                        // 处理错误情况
+                        alert("房间更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+        // 活动管理表单提交事件监听
+        $("#activity-submit-btn").click(function() {
+            var activityTitle = $("#activity-title").val();
+            var activityContent = $("#activity-content").val();
+            var activityLocation = $("#activity-location").val();
+            var activityTime = $("#activity-time").val();
+            var activityImage = $("#activity-image_url")[0].files[0];
+            var formData = new FormData();
+            var itemId = $("#activity-id").val();
+            formData.append("title", activityTitle);
+            formData.append("content", activityContent);
+            formData.append("location", activityLocation);
+            formData.append("time", activityTime);
+            formData.append("image_url", activityImage);
+            formData.append("id", itemId);
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addActivity",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("活动添加成功！");
+                        location.reload();
+                        $("#activity-title").val("");
+                        $("#activity-content").val("");
+                        $("#activity-location").val("");
+                        $("#activity-time").val("");
+                        $("#activity-image_url").val("");
+                    },
+                    error: function() {
+                        alert("活动添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id");// 获取编辑的项的ID
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateActivity",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("活动更新成功！");
+                        location.reload();
+                        $("#activity-title").val("");
+                        $("#activity-content").val("");
+                        $("#activity-location").val("");
+                        $("#activity-time").val("");
+                        $("#activity-image_url").val("");
+                    },
+                    error: function() {
+                        alert("活动更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+// 商品管理表单提交事件监听
+        $("#product-submit-btn").click(function() {
+            var productName = $("#product-name").val();
+            var productNum = $("#product-num").val();
+            var productPrice = $("#product-price").val();
+            var productImage = $("#product-image_url")[0].files[0];
+            var formData = new FormData();
+            var itemId = $("#product-id").val();
+            formData.append("name", productName);
+            formData.append("num", productNum);
+            formData.append("price", productPrice);
+            formData.append("image_url", productImage);
+            formData.append("id", itemId);
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addProduct",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("商品添加成功！");
+                        location.reload();
+                        $("#product-name").val("");
+                        $("#product-num").val("");
+                        $("#product-price").val("");
+                        $("#product-image_url").val("");
+                    },
+                    error: function() {
+                        alert("商品添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id"); // 获取编辑的项的ID
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateProduct",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("商品更新成功！");
+                        location.reload();
+                        $("#product-name").val("");
+                        $("#product-num").val("");
+                        $("#product-price").val("");
+                        $("#product-image_url").val("");
+                    },
+                    error: function() {
+                        alert("商品更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+// 用户管理表单提交事件监听
+        $("#user-submit-btn").click(function() {
+            var username = $("#user-username").val();
+            var password = $("#user-password").val();
+            var email = $("#user-email").val();
+            var phone = $("#user-phone").val();
+            var address = $("#user-address").val();
+            var userImage = $("#user-image_url")[0].files[0];
+            var formData = new FormData();
+            var itemId = $("#user-id").val();
+            formData.append("username", username);
+            formData.append("password", password);
+            formData.append("email", email);
+            formData.append("phone", phone);
+            formData.append("address", address);
+            formData.append("image_url", userImage);
+            formData.append("id", itemId);
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addUser",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("用户添加成功！");
+                        location.reload();
+                        $("#user-username").val("");
+                        $("#user-password").val("");
+                        $("#user-email").val("");
+                        $("#user-phone").val("");
+                        $("#user-address").val("");
+                        $("#user-image_url").val("");
+                    },
+                    error: function() {
+                        alert("用户添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id"); // 获取编辑的项的ID
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateUser",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert("用户更新成功！");
+                        location.reload();
+                        $("#user-username").val("");
+                        $("#user-password").val("");
+                        $("#user-email").val("");
+                        $("#user-phone").val("");
+                        $("#user-address").val("");
+                        $("#user-image_url").val("");
+                    },
+                    error: function() {
+                        alert("用户更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+// 订单管理表单提交事件监听
+        $("#order-submit-btn").click(function() {
+            var username = $("#order-username").val();
+            var productName = $("#order-product").val();
+            var orderTime = $("#order-time").val();
+            var totalPrice = $("#order-price").val();
+            var itemId = $("#order-id").val();
+            var formData = {
+                username: username,
+                productName: productName,
+                orderTime: orderTime,
+                totalPrice: totalPrice,
+                 id: itemId
+            };
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addOrder",
+                    data: formData,
+                    success: function(response) {
+                        alert("订单添加成功！");
+                        location.reload();
+                        $("#order-username").val("");
+                        $("#order-product").val("");
+                        $("#order-time").val("");
+                        $("#order-price").val("");
+                    },
+                    error: function() {
+                        alert("订单添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id"); // 获取编辑的项的ID
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateOrder",
+                    data: formData,
+                    success: function(response) {
+                        alert("订单更新成功！");
+                        location.reload();
+                        $("#order-username").val("");
+                        $("#order-product").val("");
+                        $("#order-time").val("");
+                        $("#order-price").val("");
+                    },
+                    error: function() {
+                        alert("订单更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+// 留言板管理表单提交事件监听
+        $("#chatroom-submit-btn").click(function() {
+            var username = $("#chatroom-username").val();
+            var content = $("#chatroom-content").val();
+            var time = $("#chatroom-time").val();
+            var itemId = $("#chatroom-id").val();
+            var formData = {
+                username: username,
+                content: content,
+                time: time,
+                id: itemId
+            };
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/addMessage",
+                    data: formData,
+                    success: function(response) {
+                        alert("留言添加成功！");
+                        location.reload();
+                        $("#chatroom-username").val("");
+                        $("#chatroom-content").val("");
+                        $("#chatroom-time").val("");
+                    },
+                    error: function() {
+                        alert("留言添加失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id"); // 获取编辑的项的ID
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateMessage",
+                    data: formData,
+                    success: function(response) {
+                        alert("留言更新成功！");
+                        location.reload();
+                        $("#chatroom-username").val("");
+                        $("#chatroom-content").val("");
+                        $("#chatroom-time").val("");
+                    },
+                    error: function() {
+                        alert("留言更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+// 个人中心管理表单提交事件监听
+        $("#profile-submit-btn").click(function() {
+            var username = $("#profile-username").val();
+            var password = $("#profile-password").val();
+            var email = $("#profile-email").val();
+            var itemId = $("#profile-id").val();
+            var formData = {
+                username: username,
+                password: password,
+                email: email,
+                id: itemId
+            };
+
+            if (currentMode === "add") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateProfile",
+                    data: formData,
+                    success: function(response) {
+                        alert("个人信息更新成功！");
+                        location.reload();
+                        $("#profile-password").val("");
+                    },
+                    error: function() {
+                        alert("个人信息更新失败，请重试。");
+                    }
+                });
+            } else if (currentMode === "edit") {
+                var itemId = $(this).data("id"); // 获取编辑的项的ID
+                $.ajax({
+                    type: "POST",
+                    url: "/api/updateProfile",
+                    data: formData,
+                    success: function(response) {
+                        alert("个人信息更新成功！");
+                        location.reload();
+                        $("#profile-password").val("");
+                    },
+                    error: function() {
+                        alert("个人信息更新失败，请重试。");
+                    }
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

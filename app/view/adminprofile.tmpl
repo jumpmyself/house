@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-image: url('/static/backgroud_3.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw;
+            margin: 0 auto 20px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .list-item {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .list-item p {
+            margin: 5px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* 初始隐藏列表容器 */
+        #orderContainer, #messageContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="#" class="top-nav" data-target="room">房间管理</a>
+    <a href="#" class="top-nav" data-target="activity">活动管理</a>
+    <a href="#" class="top-nav" data-target="product">商品管理</a>
+    <a href="#" class="top-nav" data-target="user">用户管理</a>
+    <a href="#" class="top-nav" data-target="order">订单管理</a>
+    <a href="#" class="top-nav" data-target="chatroom">留言板</a>
+    <a href="/profile" class="top-nav">个人中心</a>
+</div>
+<h1>个人中心</h1>
+
+<button onclick="loadOrders()">加载商品订单</button>
+<button onclick="loadMessages()">加载留言</button>
+<button onclick="logout()">退出登录</button>
+
+<div id="orderContainer"></div>
+<div id="messageContainer"></div>
+
+<script>
+    // 加载商品订单
+    function loadOrders() {
+        // 隐藏留言容器
+        document.getElementById('messageContainer').style.display = 'none';
+
+        // 显示订单容器
+        document.getElementById('orderContainer').style.display = 'block';
+
+        fetch('/api/products')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayOrders(data.data);
+            })
+            .catch(error => {
+                console.error('Error fetching orders:', error);
+                alert('加载订单数据失败，请稍后重试。');
+            });
+    }
+
+    // 显示订单数据
+    function displayOrders(orders) {
+        const orderContainer = document.getElementById('orderContainer');
+        orderContainer.innerHTML = '';
+
+        orders.forEach(order => {
+            const orderDiv = document.createElement('div');
+            orderDiv.classList.add('list-item');
+
+            const recipientInfo = `<p>收货人: ${order.user_name}</p>`;
+            const totalInfo = `<p>订单号: ${order.uuid} - 总价: ￥${order.total_price}</p>`;
+
+            const itemInfo = `
+                <div class="orderItem">
+                    <p>商品名称: ${order.product_name}</p>
+                    <p>数量: ${order.quantity}</p>
+                    <p>单价: ￥${order.price}</p>
+                    <p>总价: ￥${order.total_price}</p>
+                    <p>收货地址: ${order.address}</p>
+                    <p>下单时间: ${order.created_at}</p>
+                    <p>订单状态：${order.status}</p>
+                    <button onclick="MarkAsDelivered('${order.uuid}')">发货</button>
+                </div>
+            `;
+
+            orderDiv.innerHTML = recipientInfo + totalInfo + itemInfo;
+            orderContainer.appendChild(orderDiv);
+        });
+    }
+// 在 profile 页面的 JavaScript 代码中
+function MarkAsDelivered(orderId) {
+  // 调用后端 API 更新订单状态
+  fetch(`/api/orders/${orderId}/deliver`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    // 处理发货成功的响应
+    console.log(data.message);
+       window.location.reload();
+  })
+  .catch(error => {
+    // 处理发货失败的情况
+    console.error('Error updating order status:', error);
+  });
+}
+    // 加载留言
+    function loadMessages() {
+        // 隐藏订单容器
+        document.getElementById('orderContainer').style.display = 'none';
+
+        // 显示留言容器
+        document.getElementById('messageContainer').style.display = 'block';
+
+        fetch('/api/messages')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayMessages(data.messages);
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
+                alert('加载留言数据失败，请稍后重试。');
+            });
+    }
+
+    // 显示留言数据
+    function displayMessages(messages) {
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.innerHTML = '';
+
+        messages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('list-item');
+
+            const senderInfo = `<p>发送人: ${message.username}</p>`;
+            const contentInfo = `<p>内容: ${message.content}</p>`;
+            const timeInfo = `<p>发送时间: ${message.timestamp}</p>`;
+            const replyInfo = `<p>回复: ${message.message}</p>`;
+            const replyButton = `<button onclick="replyToMessage('${message.message}')">回复</button>`;
+
+            messageDiv.innerHTML = senderInfo + contentInfo + timeInfo +replyInfo + replyButton;
+            messageContainer.appendChild(messageDiv);
+        });
+    }
+
+    // 回复留言按钮点击事件
+  function replyToMessage(messageId) {
+    const replyText = prompt('请输入您的回复:');
+    if (replyText !== null) {
+        // 使用 AJAX 发送回复给后端
+        $.ajax({
+            url: `/api/messages/${messageId}/reply`,
+            type: 'POST',
+            data: {
+                messageId: 4,
+                replyText: replyText
+            },
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            success: function(data) {
+                alert('回复成功！');
+                loadMessages(); // 重新加载留言列表
+            },
+            error: function(xhr, status, error) {
+                console.error('Error replying to message:', error);
+                alert('回复操作失败，请稍后重试。');
+            }
+        });
+    }
+}
+
+    // 退出登录点击事件
+    function logout() {
+        fetch('/user/logout', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("退出登录成功");
+                    window.location.href = "/user/login";
+                } else {
+                    throw new Error('Failed to logout');
+                }
+            })
+            .catch(error => {
+                console.error('Error logging out:', error);
+                alert('退出登录失败，请稍后重试。');
+            });
+    }
+
+    // 在页面加载完成时调用加载商品订单和留言列表的函数
+    document.addEventListener('DOMContentLoaded', () => {
+        // 初始隐藏列表容器
+        document.getElementById('orderContainer').style.display = 'none';
+        document.getElementById('messageContainer').style.display = 'none';
+    });
+</script>
+</body>
+</html>

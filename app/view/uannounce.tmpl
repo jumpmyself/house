@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Announcement</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw; /* 导航栏最大宽度 */
+            margin: 0 auto; /* 居中导航栏 */
+        }
+
+        .carousel-container {
+            max-width: 800px; /* 内容最大宽度 */
+            margin: 0 auto; /* 水平居中内容 */
+            overflow: hidden; /* 隐藏超出容器高度的内容 */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        /* 新增样式 */
+        .page-content {
+            max-width: 1200px; /* 页面内容的最大宽度 */
+            margin: 0 auto; /* 居中页面内容 */
+            padding: 0 15px; /* 左右留出空白 */
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="/user/index">首页</a>
+    <a href="/user/announce">活动</a>
+    <a href="/user/shopping">商城</a>
+    <a href="/user/chat">留言板</a>
+    <a href="/user/profile">个人中心</a>
+</div>
+
+<!-- 新增容器包裹页面内容 -->
+<div class="page-content">
+
+    <h1>活动详情</h1>
+
+    <!-- 添加日期选择器 -->
+    <label for="date">选择日期：</label>
+    <input type="date" id="date" name="date">
+
+    <ul id="bulletinList"></ul>
+
+</div>
+
+<script>
+    const dateInput = document.getElementById("date");
+    const bulletinList = document.getElementById("bulletinList");
+
+    dateInput.addEventListener("change", function() {
+        const selectedDate = this.value;
+        bulletinList.innerHTML = ""; // 清空列表
+
+        fetch("/user/announce/detail?date=" + selectedDate, {
+            method: "GET"
+        })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(bulletin => {
+                    const li = document.createElement("li");
+                    const h2 = document.createElement("h2");
+                    const pContent = document.createElement("p");
+                    const pDateTime = document.createElement("p");
+                    const pPlace = document.createElement("p");
+                    const img = document.createElement("img");
+
+                    h2.textContent = bulletin.Title;
+                    // 格式化日期时间
+                    const bulletinDateTime = new Date(bulletin.datetime);
+                    const formattedDateTime = `${bulletinDateTime.getFullYear()}-${(bulletinDateTime.getMonth() + 1).toString().padStart(2, '0')}-${bulletinDateTime.getDate().toString().padStart(2, '0')} ${bulletinDateTime.getHours().toString().padStart(2, '0')}:${bulletinDateTime.getMinutes().toString().padStart(2, '0')}`;
+                    pDateTime.textContent = "时间：" + formattedDateTime;
+
+                    pPlace.textContent = "地点：" + bulletin.place;
+                    pContent.textContent = bulletin.content;
+
+                    var imageUrl = "/static/" + bulletin.image_url;
+                    img.src = imageUrl;
+                    img.style.width = "100%";
+                    img.style.height = "75%";
+
+                    li.appendChild(h2);
+                    li.appendChild(pDateTime);
+                    li.appendChild(pPlace);
+                    li.appendChild(pContent);
+                    li.appendChild(img);
+                    bulletinList.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    });
+</script>
+</body>
+</html>

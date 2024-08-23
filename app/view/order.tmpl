@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员首页</title>
+    <!-- 引入jQuery库 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+        }
+
+        /* 左侧侧边栏样式 */
+        .sidebar {
+            background-color: #333;
+            color: #fff;
+            width: 200px;
+            padding-top: 60px;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px 15px;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover {
+            background-color: #555;
+        }
+
+        /* 右侧内容区样式 */
+        .content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw;
+            margin: 0 auto 20px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        /* 订单列表样式 */
+        #order-list {
+            margin-top: 20px;
+        }
+
+        .list-item {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* 搜索框样式 */
+        #search-form {
+            margin-bottom: 20px;
+        }
+
+        #search-input,
+        #search-btn {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #search-btn {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #search-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <a href="#" class="sidebar-nav" data-target="room">房间管理</a>
+    <a href="#" class="sidebar-nav" data-target="product">商品管理</a>
+</div>
+
+<div class="content">
+    <div class="navbar">
+        <a href="#" class="top-nav" data-target="room">房间管理</a>
+        <a href="#" class="top-nav" data-target="activity">活动管理</a>
+        <a href="#" class="top-nav" data-target="product">商品管理</a>
+        <a href="#" class="top-nav" data-target="user">用户管理</a>
+        <a href="/order" class="top-nav">订单管理</a>
+        <a href="/chatroom" class="top-nav">留言板</a>
+        <a href="/profile" class="top-nav">个人中心</a>
+    </div>
+    <div>
+        <form id="search-form">
+            <input type="text" id="search-input" placeholder="搜索订单">
+            <button id="search-btn">搜索</button>
+        </form>
+    </div>
+    <div id="order-list">
+        <!-- 订单列表显示区域 -->
+    </div>
+
+
+</div>
+
+<script>
+    $(document).ready(function() {
+        // 点击侧边栏导航处理事件
+        $(".sidebar-nav").click(function() {
+            var target = $(this).data("target");
+
+            // 根据目标发送对应的 AJAX 请求
+            if (target === "room") {
+                // 发送获取房间列表的请求
+                $.get("/api/rooms", function(response) {
+                    if (response.code === 0 && Array.isArray(response.data)) {
+                        $("#order-list").empty();
+                        response.data.forEach(function(room) {
+                            var item = '<div class="list-item">' +
+                                '<span>房间名称: ' + room.name + '</span>' +
+                                '<button class="delete-btn" data-id="' + room.id + '">删除</button>' +
+                                '<button class="edit-btn" data-id="' + room.id + '">编辑</button>' +
+                                '</div>';
+                            $("#order-list").append(item);
+                        });
+                    } else {
+                        console.error("获取房间列表失败:", response);
+                    }
+                });
+            } else if (target === "product") {
+                // 发送获取商品列表的请求
+                $.get("/api/products", function(response) {
+                    if (response.code === 0 && Array.isArray(response.data)) {
+                        $("#order-list").empty();
+                        response.data.forEach(function(product) {
+                            var status = product.status === '已发货' ? '已发货' : '未发货';
+                            var item = '<div class="list-item">' +
+                                '<span>商品名称: ' + product.product_name + '</span>' +
+                                '<span>状态: ' + status + '</span>' +
+                                '<button class="delete-btn" data-id="' + product.id + '">删除</button>' +
+                                '<button class="edit-btn" data-id="' + product.id + '">编辑</button>';
+
+                            // 添加标记发货按钮，仅当状态为未发货时显示
+                            if (product.status !== '已发货') {
+                                item += '<button class="ship-btn" data-id="' + product.id + '">标记发货</button>';
+                            }
+
+                            item += '</div>';
+                            $("#order-list").append(item);
+                        });
+                    } else {
+                        console.error("获取商品列表失败:", response);
+                    }
+                });
+                    };
+                });
+
+
+
+        // 搜索订单功能
+        $("#search-btn").click(function() {
+            var keyword = $("#search-input").val();
+            // 发送 AJAX 请求搜索订单
+            $.get("/api/searchOrders", { keyword: keyword }, function(data) {
+                $("#order-list").empty();
+                data.forEach(function(order) {
+                    var item = '<div class="list-item">' +
+                        '<span>订单编号: ' + order.orderNumber + '</span>' +
+                        '<span>金额: ' + order.amount + '</span>' +
+                        '<span>状态: ' + order.status + '</span>' +
+                        '<button class="delete-btn" data-id="' + order.id + '">删除</button>' +
+                        '<button class="edit-btn" data-id="' + order.id + '">编辑</button>' +
+                        '</div>';
+                    $("#order-list").append(item);
+                });
+            });
+        });
+
+        // 处理订单发货功能
+        $("#order-list").on("click", ".ship-btn", function() {
+            var productId = $(this).data("id");
+            // 发送 AJAX 请求，标记订单为已发货
+            $.post("/api/shipProduct", { id: productId }, function(response) {
+                // 更新相应的 UI，例如修改状态显示为已发货
+                $(this).siblings(".status").text("已发货");
+                // 或重新加载订单列表
+                // $(".sidebar-nav[data-target='order']").trigger("click");
+            });
+        });
+
+        // 监听列表项的删除按钮点击事件
+        $("#order-list").on("click", ".delete-btn", function() {
+            var itemId = $(this).data("id");
+            // 发送 AJAX 请求删除对应项
+            $.post("/api/deleteOrder", { id: itemId }, function(response) {
+                // 从界面中移除被删除的订单项
+                $(this).closest(".list-item").remove();
+            });
+        });
+
+        // 监听列表项的编辑按钮点击事件
+        $("#order-list").on("click", ".edit-btn", function() {
+            var itemId = $(this).data("id");
+            // 执行编辑操作，例如弹出编辑框，填充数据等
+            // 示例：$('#editModal').modal('show');
+        });
+    });
+</script>
+
+</body>
+</html>

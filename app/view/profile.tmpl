@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <style>
+        /* 你的 CSS 样式在这里 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%; /* 导航栏占满全屏 */
+            margin: 0; /* 边距设为0，取消默认边距 */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        /* 页面部分容器样式 */
+        .container {
+            max-width: 1200px; /* 最大宽度为1200px */
+            margin: 0 auto; /* 水平居中 */
+            padding: 0 20px; /* 左右内边距 */
+        }
+        .profile-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .edit-profile-btn,
+        .logout-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-profile-btn:hover,
+        .logout-btn:hover {
+            background-color: #0056b3;
+        }
+        .order-management-btn{
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .edit-form label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .edit-form input[type="text"],
+        .edit-form input[type="email"],
+        .edit-form input[type="tel"],
+        .edit-form input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .edit-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="/user/index">首页</a>
+    <a href="/user/announce">活动</a>
+    <a href="/user/shopping">商城</a>
+    <a href="/user/chat">留言板</a>
+    <a href="/user/profile">个人中心</a>
+</div>
+
+<div class="profile-container">
+    <!-- 添加个人头像 -->
+    <img src="/static/default_avatar.png" alt="个人头像" class="profile-img">
+
+
+    <div class="profile-info" id="profile-info">
+        <!-- 个人信息将被插入到这里 -->
+    </div>
+    <!-- 编辑个人资料按钮和登出按钮 -->
+    <button class="edit-profile-btn" onclick="toggleEditForm()">编辑个人资料</button>
+    <!-- 添加订单管理按钮 -->
+    <button class="order-management-btn" onclick="loadOrders()">房间订单</button>
+    <button class="order-management-btn" onclick="loadProductOrders()">商品订单</button>
+    <button class="logout-btn">退出登录</button>
+    <!-- 订单信息容器 -->
+    <div id="orders-container"></div>
+
+
+</div>
+
+    <div class="edit-form" id="edit-form">
+        <label for="Username">用户名:</label>
+        <input type="text" id="Username" name="Username" required><br>
+        <label for="Email">Email:</label>
+        <input type="email" id="Email" name="Email" required><br>
+        <label for="City">城市:</label>
+        <input type="text" id="City" name="City"> <!-- 添加了城市输入框 -->
+        <label for="Age">年龄:</label>
+        <input type="number" id="Age" name="Age" min="1"><br>
+        <label for="Telephone">手机号:</label>
+        <input type="tel" id="Telephone" name="Telephone"><br> <!-- 添加了手机号输入框 -->
+        <label for="Password">密码:</label>
+        <input type="password" id="Password" name="Password"><br> <!-- 添加了密码输入框 -->
+        <button onclick="saveProfile()">保存</button>
+    </div>
+
+</div>
+
+<script>
+
+    // 辅助函数：从Cookie中获取指定名称的值
+    function getCookie(name) {
+        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return cookieValue ? cookieValue.pop() : '';
+    }
+
+    function toggleEditForm() {
+        const editForm = document.getElementById('edit-form');
+        editForm.classList.toggle('active');
+    }
+    function loadOrders() {
+        // 从Cookie中获取name的值
+        const name = getCookie('name');
+        console.log('name:', name);
+
+        // 如果name不存在，则提醒用户登录
+        if (!name) {
+            alert('请先登录');
+            return;
+        }
+
+        // 构建请求体对象，将用户名放入请求体中
+        const requestBody = {
+            name: name
+        };
+
+        fetch('/user/orders/room', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody) // 将请求体对象转换为JSON字符串并发送
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('获取订单信息失败。');
+                }
+            })
+            .then(data => {
+                // 在页面上显示订单信息
+                displayOrders(data);
+            })
+            .catch(error => {
+                console.error('加载订单信息时出错：', error);
+                // 在页面上显示加载失败的消息
+                alert('加载订单信息失败，请稍后再试。');
+            });
+    }
+
+    function loadProductOrders() {
+        // 从Cookie中获取name的值
+        const name = getCookie('name');
+        console.log('name:', name);
+
+        // 如果name不存在，则提醒用户登录
+        if (!name) {
+            alert('请先登录');
+            return;
+        }
+
+        // 构建请求体对象，将用户名放入请求体中
+        const requestBody = {
+            name: name
+        };
+
+        fetch('/user/orders/product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody) // 将请求体对象转换为JSON字符串并发送
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('获取订单信息失败。');
+                }
+            })
+            .then(data => {
+                // 在页面上显示订单信息
+                displayProductOrders(data);
+            })
+            .catch(error => {
+                console.error('加载订单信息时出错：', error);
+                // 在页面上显示加载失败的消息
+                alert('加载订单信息失败，请稍后再试。');
+            });
+    }
+
+    function displayOrders(orders) {
+        // 获取订单信息的容器
+        const ordersContainer = document.getElementById('orders-container');
+
+        // 清空容器中的内容
+        ordersContainer.innerHTML = '';
+
+        // 遍历订单数组，创建订单条目并添加到容器中
+        orders.forEach(order => {
+            const orderItem = document.createElement('div');
+            orderItem.classList.add('order-item');
+            orderItem.innerHTML = `
+            <p><strong>订单编号：</strong> ${order.uuid}</p>
+            <p><strong>用户名：</strong> ${order.name}</p>
+            <p><strong>房间名：</strong> ${order.house_name}</p>
+            <p><strong>数量：</strong> ${order.num}</p>
+            <p><strong>单价：</strong> ${order.price}</p>
+            <p><strong>总价：</strong> ${order.total_price}</p>
+            <p><strong>联系方式：</strong> ${order.phone}</p>
+            <hr>
+        `;
+            ordersContainer.appendChild(orderItem);
+        });
+    }
+    function displayProductOrders(orders) {
+        // 获取订单信息的容器
+        const ordersContainer = document.getElementById('orders-container');
+
+        // 清空容器中的内容
+        ordersContainer.innerHTML = '';
+
+        // 遍历订单数组，创建订单条目并添加到容器中
+        orders.forEach(order => {
+            const orderItem = document.createElement('div');
+            orderItem.classList.add('order-item');
+            orderItem.innerHTML = `
+            <p><strong>订单编号：</strong> ${order.uuid}</p>
+            <p><strong>用户名：</strong> ${order.user_name}</p>
+            <p><strong>商品名：</strong> ${order.product_name}</p>
+            <p><strong>数量：</strong> ${order.quantity}</p>
+            <p><strong>单价：</strong> ${order.price}</p>
+            <p><strong>总价：</strong> ${order.total_price}</p>
+            <p><strong>联系方式：</strong> ${order.telephone}</p>
+            <p><strong>发货状态：</strong> ${order.status}</p>
+            <hr>
+        `;
+            ordersContainer.appendChild(orderItem);
+        });
+    }
+
+    function saveProfile() {
+        const Username = document.getElementById('Username').value;
+        const Email = document.getElementById('Email').value;
+        const City = document.getElementById('City').value; // 获取城市字段的值
+        const Age = parseInt(document.getElementById('Age').value); // 将年龄字段转换为整数
+        const Telephone = document.getElementById('Telephone').value; // 获取手机号字段的值
+        const Password = document.getElementById('Password').value; // 获取密码字段的值
+
+        const data = { Username, Email, City, Age, Telephone, Password }; // 将所有字段添加到数据对象中
+
+        // 发送请求保存个人资料
+        fetch('/user/update/profile/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // 将响应解析为 JSON
+                } else {
+                    throw new Error('保存个人资料失败。');
+                }
+            })
+            .then(data => {
+                console.log('个人资料保存成功。');
+                // 更新 UI 或显示成功消息
+                alert(data.message); // 在页面上显示后端返回的消息
+            })
+            .catch(error => {
+                console.error('保存个人资料时出错：', error);
+                // 在页面上显示保存失败的消息
+                alert('保存个人资料失败，请稍后再试。');
+            });
+    }
+
+
+    // 发送注销请求并重定向到登录页面
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+        // 发送请求注销账号
+        fetch('/user/logout', {
+            method: 'GET',
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('成功注销账号。');
+                    // 在注销成功后将用户重定向到登录页面
+                    window.location.href = "/user/login"; // 假设登录页面的路由为 "/user/login"
+                } else {
+                    console.error('注销账号失败。');
+                }
+            })
+            .catch(error => {
+                console.error('注销账号时出错：', error);
+            });
+    });
+
+    // 当页面加载时获取用户个人资料数据
+    window.addEventListener('load', () => {
+        fetch('/user/profile/detail')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('获取个人资料数据失败。');
+                }
+            })
+            .then(data => {
+                // 更新 UI 中的个人资料信息
+                const profileInfo = document.getElementById('profile-info');
+                profileInfo.innerHTML = `
+        <p><strong>用户名：</strong> ${data.user.username}</p>
+        <p><strong>Email：</strong> ${data.user.email}</p>
+        <p><strong>收货地址：</strong> ${data.user.city}</p> <!-- 注意这里的城市字段名为小写 -->
+        <p><strong>年龄：</strong> ${data.user.age}</p> <!-- 注意这里的年龄字段名为小写 -->
+        <p><strong>手机号：</strong> ${data.user.telephone}</p>
+    `;
+            })
+
+                .catch(error => {
+                console.error('获取个人资料数据时出错：', error);
+            });
+    });
+
+</script>
+</body>
+</html>
+
+

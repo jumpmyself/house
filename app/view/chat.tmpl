@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>留言板</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw; /* 导航栏最大宽度 */
+            margin: 0 auto 20px; /* 居中导航栏，并留出一些底部空间 */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        #messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            background-color: #fff;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message p {
+            margin: 0;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* 添加响应式样式 */
+        @media screen and (max-width: 600px) {
+            input[type="text"],
+            textarea,
+            button[type="submit"] {
+                width: 100%;
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="navbar">
+    <a href="/user/index">首页</a>
+    <a href="/user/announce">活动</a>
+    <a href="/user/shopping">商城</a>
+    <a href="/user/chat">留言板</a>
+    <a href="/user/profile">个人中心</a>
+</div>
+<h1>留言板</h1>
+<div id="messages">
+    <!-- 留言将显示在这里 -->
+</div>
+
+<form id="message-form">
+    <input type="text" id="username" placeholder="用户名" required>
+    <br>
+    <textarea id="content" placeholder="留言内容" required></textarea>
+    <br>
+    <button type="submit">发送留言</button>
+</form>
+
+
+<script>
+    // 页面加载时获取用户名并设置为用户名输入框的默认值
+    const name = getCookie('name'); // 传递Cookie名称作为参数
+    $('#username').val(name);
+    // 辅助函数：从Cookie中获取指定名称的值
+    function getCookie(name) {
+        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return cookieValue ? cookieValue.pop() : '';
+    }
+    // 加载留言
+    function loadMessages() {
+        $.ajax({
+            url: '/user/messages',
+            method: 'GET',
+            success: function(response) {
+                // 清空现有的留言
+                $('#messages').empty();
+
+                // 显示每条留言
+                response.forEach(function(message) {
+                    var messageHTML = '<div class="message">';
+                    messageHTML += '<p>用户名: ' + message.username + '</p>';
+                    messageHTML += '<p>内容: ' + message.content + '</p>';
+                    messageHTML += '<p>时间戳: ' + message.timestamp + '</p>';
+                    messageHTML += '<p>商家回复: ' + message.message + '</p>';
+                    messageHTML += '</div>';
+                    $('#messages').append(messageHTML);
+                });
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+
+    // 发送留言
+    $('#message-form').submit(function(event) {
+        event.preventDefault();
+
+
+
+        var username = $('#username').val();
+        var content = $('#content').val();
+
+        $.ajax({
+            url: '/user/messages',
+            method: 'POST',
+            data: JSON.stringify({
+                username: username,
+                content: content
+            }),
+            contentType: 'application/json',
+            success: function(response) {
+                // 清空输入框
+                $('#username').val('');
+                $('#content').val('');
+
+                // 重新加载留言
+                loadMessages();
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+    // 页面加载时加载留言
+    loadMessages();
+</script>
+</body>
+</html>

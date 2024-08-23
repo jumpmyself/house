@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房间详情</title>
+    <!-- 引入样式表等资源 -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <style>
+        /* 样式调整 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .carousel-container {
+            margin-bottom: 20px;
+            max-width: 800px; /* 轮播图容器最大宽度 */
+            margin: 0 auto; /* 居中显示 */
+            height: 400px; /* 设置固定高度 */
+        }
+
+        .carousel-container .slick-slide img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .room-detail-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            position: relative; /* 设置相对定位 */
+            top: 20px; /* 调整垂直方向的位置 */
+        }
+        .room-detail-container h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .room-detail-container p {
+            margin-bottom: 5px;
+            font-size: 14px; /* 字体稍大一点 */
+        }
+
+        .room-detail-container .detail-section p {
+            margin-bottom: 8px;
+            font-size: 16px; /* 价格面积房型字体稍大一点 */
+        }
+
+        /* 订单信息弹出框样式 */
+        .order-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .order-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 400px;
+        }
+
+        .order-modal-content h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .order-modal-content label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .order-modal-content input,
+        .order-modal-content select {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-modal-content button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* 首页和预定按钮样式 */
+        .home-btn,
+        .book-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-btn:hover,
+        .book-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="#" id="home-link">首页</a>
+    <a href="#" id="activity-link">活动</a>
+    <a href="#" id="shop-link">商城</a>
+    <a href="#" id="chat-link">留言板</a>
+    <a href="#" id="profile-link">个人中心</a>
+</div>
+
+<!-- 轮播图容器 -->
+<div class="carousel-container">
+    <div id="room-images" class="slick-carousel">
+        <!-- 这里将显示房间图片的轮播图 -->
+    </div>
+</div>
+
+<div class="room-detail-container">
+    <h2 id="room-name"></h2>
+    <div class="detail-section">
+        <p id="room-price"></p>
+        <p id="room-area"></p>
+        <p id="room-type"></p>
+    </div>
+    <p id="room-facility"></p>
+    <p id="room-policy"></p>
+    <div>
+        <button class="book-btn">预定</button>
+    </div>
+</div>
+
+<!-- HTML -->
+<form id="purchaseForm" action="/user/buy/room" method="POST">
+<div class="order-modal" id="order-modal">
+    <div class="order-modal-content">
+        <h2>订单信息</h2>
+        <label for="room">房间名:</label>
+        <input type="text" id="room" name="room" readonly><br>
+        <label for="quantity">数量:</label>
+        <input type="number" id="quantity" name="quantity" required><br>
+        <label for="unit-price">单价:</label>
+        <input type="text" id="unit-price" name="unit-price" readonly><br>
+        <label for="total-price">总价:</label>
+        <input type="text" id="total-price" name="total-price" readonly><br>
+        <label for="username">姓名:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="phone">手机号:</label>
+        <input type="tel" id="phone" name="phone" required><br>
+        <label for="notes">备注:</label>
+        <textarea id="notes" name="notes"></textarea><br>
+        <input type="hidden" id="houseId" name="houseId" value="">
+        <input type="hidden" id="name" name="name" value="">
+        <button id="submit-order-btn">提交订单</button>
+    </div>
+</div>
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+
+    // 获取导航栏链接的元素
+    const homeLink = document.getElementById('home-link');
+    const activityLink = document.getElementById('activity-link');
+    const shopLink = document.getElementById('shop-link');
+    const chatLink = document.getElementById('chat-link');
+    const profileLink = document.getElementById('profile-link');
+
+    // 设置导航栏链接的跳转目标
+    homeLink.href = '/user/index';
+    activityLink.href = '/activity.html';
+    shopLink.href = '/shop.html';
+    chatLink.href = '/chat.html';
+    profileLink.href = '/profile.html';
+    $(document).ready(function() {
+        // 获取房间 ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('roomId');
+        // 获取"name"字段的值并存储到变量
+        const name = getCookie('name');
+
+        // 在控制台输出 name 的值
+        console.log('name:', name);
+
+        // 发起 AJAX 请求获取房间详情数据
+        $.ajax({
+            url: `/room/info/detail?roomId=${roomId}`, // 替换为实际的后端接口 URL
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                displayRoomDetail(response.data);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+            }
+        });
+
+        // 定义获取Cookie值的函数
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return null;
+        }
+
+        // 展示房间详情数据
+        function displayRoomDetail(room) {
+            $('#room-name').text(`房间名称：${room.name}`);
+            $('#room-price').text(`价格：${room.price}元/天`);
+            $('#room-area').text(`面积：${room.area}m²`);
+            $('#room-type').text(`床型：${room.type}`);
+            $('#room-facility').text(`设施：${room.facility}`);
+            $('#room-policy').text(`退订政策：${room.policy}`);
+
+            // 添加房间图片到轮播图
+            const imageUrls = JSON.parse(room.image_url); // 解析JSON字符串成数组
+            imageUrls.forEach(image => {
+                const imgHtml = `<img src="/static/${image}" alt="${room.name}">`;
+                $('#room-images').append(imgHtml);
+            });
+
+            // 初始化轮播图
+            $('#room-images').slick({
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false, // 不显示箭头
+                dots: false // 不显示数字索引
+            });
+
+        }
+
+ // 预定按钮点击事件
+        $('.book-btn').click(function() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('roomId');
+            // 设置 houseId 到隐藏字段
+            $('#houseId').val(roomId);
+            // 设置 name 到隐藏字段
+            $('#name').val(name);
+            // 获取数量
+            const quantity = parseInt($('#quantity').val());
+            console.log('数量:', quantity); // 输出数量以便调试
+            if (quantity <= 0) {
+                alert('数量必须大于零');
+                return;
+            }
+
+            // 获取房间名和
+            const roomName = $('#room-name').text().split('：')[1];
+            const unitPriceText = $('#room-price').text().split('：')[1];
+            const unitPrice = parseFloat(unitPriceText.replace('元/天', ''));
+            console.log('房间名:', roomName); // 输出房间名以便调试
+            console.log('单价:', unitPrice); // 输出单价以便调试
+
+
+            // 填充房间名和单价到订单信息框
+            $('#room').val(roomName);
+            $('#unit-price').val(unitPriceText);
+
+
+            // 计算并填充总价到订单信息框
+            calculateTotalPrice();
+
+            // 显示订单信息框
+            $('#order-modal').fadeIn();
+        });
+
+// 监听数量输入框变化事件
+        $('#quantity').on('input', function() {
+            calculateTotalPrice();
+        });
+
+// 计算总价函数
+        function calculateTotalPrice() {
+            const quantity = parseInt($('#quantity').val()); // 获取数量
+            if (isNaN(quantity) || quantity <= 0) {
+                $('#total-price').val(''); // 如果数量无效，清空总价输入框
+                return;
+            }
+
+            const unitPrice = parseFloat($('#unit-price').val()); // 获取单价，转换为浮点数
+            if (isNaN(unitPrice)) {
+                $('#total-price').val(''); // 如果单价无效，清空总价输入框
+                return;
+            }
+
+            const totalPrice = quantity * unitPrice; // 计算总价
+            $('#total-price').val(totalPrice.toFixed(2)); // 填充总价，保留两位小数
+        }
+
+        // JavaScript (script.js)
+        const submitOrderBtn = document.getElementById('submit-order-btn');
+        submitOrderBtn.addEventListener('click', confirmPurchase);
+
+        function confirmPurchase() {
+            // 禁用提交订单按钮
+            submitOrderBtn.disabled = true;
+
+            const form = document.getElementById('purchaseForm');
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    // 启用提交订单按钮
+                    submitOrderBtn.disabled = false;
+
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        console.log('Response:', response);
+                        if (response.payUrl) {
+                            console.log('Redirecting to:', response.payUrl);
+                            window.location.href = response.payUrl;
+                        } else {
+                            alert(response.message);
+                        }
+                    } else {
+                        alert('Failed to submit order. Please try again later.');
+                    }
+                }
+            };
+            const formData = new FormData(form);
+            xhr.send(new URLSearchParams(formData));
+        }
+
+
+    });
+</script>
+</body>
+</html>

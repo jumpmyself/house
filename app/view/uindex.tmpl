@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; /* 包含元素的内边距和边框到总宽度和高度中 */
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            max-width: 100vw; /* 导航栏最大宽度 */
+            margin: 0 auto; /* 水平居中导航栏 */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .carousel-container {
+            width: 100%;
+            max-width: 1200px; /* 内容最大宽度 */
+            margin: 0 auto; /* 水平居中内容 */
+            overflow: hidden; /* 隐藏超出容器高度的内容 */
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 400px; /* 轮播项高度为固定值 */
+            object-fit: cover;
+            /*background-position: center; !* 设置背景位置为上部分 *!*/
+        }
+
+        .room-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+            max-width: 1200px; /* 房间列表最大宽度 */
+            margin: 0 auto; /* 水平居中房间列表 */
+        }
+
+        .room-item {
+            width: calc(33.33% - 20px);
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .room-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .room-item h3 {
+            margin: 5px 0;
+        }
+
+        .room-item p {
+            margin: 5px 0;
+        }
+
+        .room-item .book-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .room-item .book-btn:hover {
+            background-color: #0056b3;
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            margin-top: 20px; /* 调整与房间列表的间距 */
+        }
+
+        .pagination-container button {
+            margin: 0 10px; /* 按钮之间的间距 */
+        }
+        .search-container {
+            display: flex;
+            justify-content: flex-end; /* 搜索框右对齐 */
+            align-items: center; /* 垂直居中 */
+            margin-top: 20px;
+            max-width: 1430px; /* 限制搜索框宽度 */
+            margin-right:auto; /* 自动填充剩余空间 */
+        }
+
+        .search-container select {
+            padding: 8px;
+            width: 200px; /* 选择框宽度 */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .search-container button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="#" id="home-link">首页</a>
+    <a href="#" id="activity-link">活动</a>
+    <a href="#" id="shop-link">商城</a>
+    <a href="#" id="chat-link">留言板</a>
+    <a href="#" id="profile-link">个人中心</a>
+</div>
+
+<div class="carousel-container">
+    <div class="carousel">
+        <div class="carousel-item">
+            <img src="/static/image-1.jpg" alt="轮播图1">
+        </div>
+        <div class="carousel-item">
+            <img src="/static/image-2.jpg" alt="轮播图1">
+        </div>
+        <div class="carousel-item">
+            <img src="/static/image-5.jpg" alt="轮播图3">
+        </div>
+    </div>
+
+</div>
+
+<!-- 搜索框 -->
+<div class="search-container">
+    <select id="room-type-select">
+        <option value="大床房">大床房</option>
+        <option value="双床房">双床房</option>
+        <option value="圆床房">圆床房</option>
+        <option value="loft">loft</option>
+        <option value="家庭套房">家庭套房</option>
+    </select>
+    <button id="search-btn">搜索</button>
+</div>
+
+<div class="room-list">
+    <!-- 房间列表内容 -->
+</div>
+<div class="pagination-container">
+    <button class="prev-btn">上一页</button>
+    <button class="next-btn">下一页</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+    // 获取导航栏链接的元素
+    const homeLink = document.getElementById('home-link');
+    const activityLink = document.getElementById('activity-link');
+    const shopLink = document.getElementById('shop-link');
+    const chatLink = document.getElementById('chat-link');
+    const profileLink = document.getElementById('profile-link');
+
+    // 设置导航栏链接的跳转目标
+    homeLink.href = '/user/index';
+    activityLink.href = '/user/announce';
+    shopLink.href = '/user/shopping';
+    chatLink.href = '/user/chat';
+    profileLink.href = '/user/profile';
+
+    $(document).ready(function() {
+        let currentPage = 1;
+        const pageSize = 6; // 每页显示的数量
+
+        // 初始化轮播图
+        $('.carousel').slick({
+            autoplay: true,
+            autoplaySpeed: 2000,
+            arrows: false,
+            dots: true
+        });
+
+        // 发起 AJAX 请求获取房间列表数据
+        function fetchRoomList(page) {
+            $.ajax({
+                url: '/room/list', // 后端接口 URL，需要替换为实际的接口 URL
+                method: 'GET', // 请求方法为 GET
+                dataType: 'json',
+                data: { page: page, pageSize: pageSize },
+                success: function(response) {
+                    displayRoomList(response.data);
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                }
+            });
+        }
+
+        // 初始加载第一页数据
+        fetchRoomList(currentPage);
+
+        // 上一页按钮点击事件
+        $('.prev-btn').click(function() {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchRoomList(currentPage);
+            }
+        });
+
+        // 下一页按钮点击事件
+        $('.next-btn').click(function() {
+            currentPage++;
+            fetchRoomList(currentPage);
+        });
+
+        // 展示房间列表数据
+        function displayRoomList(data) {
+            const roomListContainer = $('.room-list');
+            roomListContainer.empty();
+
+            data.forEach(room => {
+                // 将字符串形式的图片URL数组转换为JavaScript数组
+                const imageUrlArray = JSON.parse(room.image_url);
+                // 取数组中的第一张图片URL
+                const firstImageUrl = imageUrlArray[0];
+
+                const roomItemHtml = `
+                    <div class="room-item">
+                        <a href="/room/info?roomId=${room.house_id}">
+                            <img src="/static/${firstImageUrl}" alt="${room.name}">
+                        </a>
+                        <h3>${room.name}</h3>
+                        <p>价格：${room.price}元/天</p>
+                        <p>数量：${room.num}间</p>
+                       <button class="book-btn" data-house-id="${room.house_id}">订房</button>
+                    </div>
+                `;
+                roomListContainer.append(roomItemHtml);
+            });
+
+            // 搜索按钮点击事件
+            $('#search-btn').click(function() {
+                const roomType = $('#room-type-select').val(); // 获取选择的房间类型
+                // 发起 AJAX 请求搜索房间信息
+                $.ajax({
+                    url: '/room/search', // 替换为实际的搜索接口 URL
+                    method: 'GET',
+                    dataType: 'json',
+                    data: { roomType: roomType },
+                    success: function(response) {
+                        // 清空原有的房间列表
+                        $('.room-list').empty();
+                        // 显示搜索到的房间信息
+                        displayRoomList(response.data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                    }
+                });
+            });
+
+            // 点击订房按钮跳转至房间详情页
+            $('.book-btn').click(function() {
+                const houseId = $(this).data('house-id');
+                window.location.href = `/room/info?roomId=${houseId}`;
+            });
+        }
+    });
+</script>
+</body>
+</html>

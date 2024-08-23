@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <!-- 引入样式表等资源 -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+    <style>
+        /* 样式调整 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .carousel-container {
+            margin-bottom: 20px;
+            max-width: 800px; /* 轮播图容器最大宽度 */
+            margin: 0 auto; /* 居中显示 */
+        }
+
+        .carousel-container .slick-slide img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .product-detail-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            position: relative; /* 设置相对定位 */
+            top: 20px; /* 调整垂直方向的位置 */
+        }
+
+        .product-detail-container h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .product-detail-container p {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .product-detail-container .detail-section p {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        /* 订单信息弹出框样式 */
+        .order-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .order-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 400px;
+        }
+
+        .order-modal-content h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .order-modal-content label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .order-modal-content input,
+        .order-modal-content select {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-modal-content button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* 首页和预定按钮样式 */
+        .home-btn,
+        .book-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-btn:hover,
+        .book-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+<div class="navbar">
+    <a href="#" id="home-link">首页</a>
+    <a href="#" id="activity-link">活动</a>
+    <a href="#" id="shop-link">商城</a>
+    <a href="#" id="chat-link">留言板</a>
+    <a href="#" id="profile-link">个人中心</a>
+</div>
+
+<!-- 轮播图容器 -->
+<div class="carousel-container">
+    <div id="product-images" class="slick-carousel">
+        <!-- 这里将显示商品图片的轮播图 -->
+    </div>
+</div>
+
+<div class="product-detail-container">
+    <h2 id="product-name"></h2>
+    <div class="detail-section">
+        <p id="product-price"></p>
+        <p id="product-description"></p>
+        <p id="product-weight"></p> <!-- 新添加的元素用于显示产品重量 -->
+    </div>
+    <div>
+        <button class="book-btn">购买</button>
+    </div>
+</div>
+
+<!-- 订单信息弹出框 -->
+<form id="purchaseForm" action="/user/buy/product" method="POST">
+    <div class="order-modal" id="order-modal">
+        <div class="order-modal-content">
+            <h2>订单信息</h2>
+            <label for="product">商品名:</label>
+            <input type="text" id="product" name="product" readonly><br>
+            <label for="quantity">数量:</label>
+            <input type="number" id="quantity" name="quantity" required><br>
+            <label for="unit-price">单价:</label>
+            <input type="text" id="unit-price" name="unit-price" readonly><br>
+            <label for="total-price">总价:</label>
+            <input type="text" id="total-price" name="total-price" readonly><br>
+            <label for="username">姓名:</label>
+            <input type="text" id="username" name="username" required><br>
+            <label for="phone">手机号:</label>
+            <input type="tel" id="phone" name="phone" required><br>
+            <label for="address">地址:</label>
+            <input type="text" id="address" name="address" required><br>
+            <input type="hidden" id="productId" name="productId" value="">
+            <button id="submit-order-btn">提交订单</button>
+        </div>
+    </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // 获取商品 ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('productId');
+        // 获取"name"字段的值并存储到变量
+        const name = getCookie('name');
+
+        // 在控制台输出 name 的值
+        console.log('name:', name);
+
+        // 发起 AJAX 请求获取商品详情数据
+        $.ajax({
+            url: `/user/product/info/detail?productId=${productId}`, // 替换为实际的后端接口 URL
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                displayProductDetail(response.data);
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error:', error);
+            }
+        });
+
+
+        // 定义获取Cookie值的函数
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return null;
+        }
+        // 展示商品详情数据
+        function displayProductDetail(product) {
+            $('#product-name').text(product.name);  // 将字段名改为小写
+            $('#product-price').text(`价格：￥${product.price}`);  // 将字段名改为小写
+            $('#product-description').text(product.description);
+            $('#product-weight').text(`规格：${product.weight}`);  // 将字段名改为小写
+
+            // 添加商品图片到轮播图
+
+            const imgHtml = `<img src="/static/${product.image_url}" alt="${product.name}">`;
+
+            $('#product-images').append(imgHtml);
+
+            // 初始化轮播图
+            $('#product-images').slick({
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false,
+                dots: false
+            });
+        }
+
+        // 购买按钮点击事件
+        $('.book-btn').click(function () {
+            const quantity = parseInt($('#quantity').val());
+            if (quantity <= 0) {
+                alert('数量必须大于零');
+                return;
+            }
+
+            const productName = $('#product-name').text();
+            const unitPriceText = $('#product-price').text().split('：')[1];
+            const unitPrice = parseFloat(unitPriceText.replace('￥', '')); // 移除货币符号 '￥'
+            const weight = $('#product-weight').text().split('：')[1];
+
+            console.log('产品名称：', productName);
+            console.log('单价文本：', unitPriceText);
+            console.log('单价：', unitPrice);
+            console.log('重量：', weight);
+
+            $('#product').val(productName);
+            $('#unit-price').val(unitPrice); // 这里不再需要保留带有货币符号的文本
+            $('#name').val(name);
+
+            calculateTotalPrice();
+
+            $('#order-modal').fadeIn();
+        });
+
+// 监听数量输入框变化事件
+        $('#quantity').on('input', function () {
+            calculateTotalPrice();
+        });
+
+// 计算总价函数
+        function calculateTotalPrice() {
+            const quantity = parseInt($('#quantity').val());
+            if (isNaN(quantity) || quantity <= 0) {
+                $('#total-price').val('');
+                return;
+            }
+
+            console.log('数量：', quantity);
+
+            // 从输入框中获取单价
+            const unitPrice = parseFloat($('#unit-price').val());
+            if (isNaN(unitPrice)) {
+                $('#total-price').val('');
+                return;
+            }
+
+            console.log('单价：', unitPrice);
+
+            const totalPrice = quantity * unitPrice; // 计算总价
+            console.log('总价：', totalPrice);
+
+            $('#total-price').val(totalPrice.toFixed(2));
+        }
+
+
+        // 提交订单按钮点击事件
+        const submitOrderBtn = document.getElementById('submit-order-btn');
+        submitOrderBtn.addEventListener('click', function () {
+            submitOrderBtn.disabled = true;
+
+            const form = document.getElementById('purchaseForm');
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    submitOrderBtn.disabled = false;
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        console.log('Response:', response);
+                        if (response.payUrl) {
+                            console.log('Redirecting to:', response.payUrl);
+                            window.location.href = response.payUrl;
+                        } else {
+                            alert(response.message);
+                        }
+                    } else {
+                        alert('Failed to submit order. Please try again later.');
+                    }
+                }
+            };
+            const formData = new FormData(form);
+            xhr.send(new URLSearchParams(formData));
+        });
+    });
+</script>
+</body>
+
+</html>
